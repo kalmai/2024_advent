@@ -1,6 +1,10 @@
 defmodule Day1 do
   def run_solution do
-    Day1.get_input() |> process_input |> sort_data |> calculate_answer |> IO.puts()
+    Day1.get_input()
+    |> process_input
+    |> sort_data
+    |> calculate_answer
+    |> IO.puts()
   end
 
   def get_input do
@@ -24,6 +28,6 @@ defmodule Day1 do
   end
 
   def calculate_pair(pair) do
-    abs Enum.at(pair, 0) - Enum.at(pair, 1)
+    abs(Enum.at(pair, 0) - Enum.at(pair, 1))
   end
 end
