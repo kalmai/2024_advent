@@ -8,7 +8,7 @@ defmodule Day2 do
 
   def get_input do
     # file_path = "./inputs/sample.txt"
-    file_path = "./inputs/input.txt" # 494 too high
+    file_path = "./inputs/input.txt" # 498 too low. 472 is lower. 519 is too low still.
     String.split(elem(File.read(file_path), 1), "\n", trim: true)
   end
 
@@ -25,15 +25,24 @@ defmodule Day2 do
   end
 
   def is_safe?(list) do
-    first_try = descending_within_range?(list)
-    if(first_try, do: true, else: descending_within_range?(Enum.reverse(list)))
+    first_try = if(descending_within_range?(list)) do
+      true
+    else
+      descending_within_range?(Enum.reverse(list))
+    end
+    single_fault_tolerant_try = if(check_every_unsafe_level_for_tolerance(list)) do
+      true
+    else
+      check_every_unsafe_level_for_tolerance(Enum.reverse(list))
+    end
+    first_try || single_fault_tolerant_try
   end
 
   def descending_within_range?(list) do
     truth_list = Enum.with_index(
       list,
       fn element, idx ->
-        neighbor_difference = if idx < 4 do
+        neighbor_difference = if idx < length(list) - 1 do
           element - Enum.at(list, idx + 1)
         else
           Enum.at(list, idx - 1) - element
@@ -42,5 +51,22 @@ defmodule Day2 do
       end
     )
     Enum.all?(truth_list)
+  end
+
+  def check_every_unsafe_level_for_tolerance(list) do
+    idx_eval_pair_list = Enum.with_index(
+      list,
+      fn element, idx ->
+        neighbor_difference = if idx < length(list) - 1 do
+          element - Enum.at(list, idx + 1)
+        else
+          Enum.at(list, idx - 1) - element
+        end
+        [idx, neighbor_difference >= 1 && neighbor_difference <= 3]
+      end
+    )
+    failures = Enum.reject(idx_eval_pair_list, fn pair -> List.last(pair) == true end)
+    lists_to_check = Enum.map(failures, fn pair -> List.delete_at(list, hd(pair)) end)
+    Enum.any?(lists_to_check, fn li -> descending_within_range?(li) end)
   end
 end
